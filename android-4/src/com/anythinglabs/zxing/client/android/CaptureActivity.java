@@ -94,7 +94,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private CaptureActivityHandler handler;
   private Result savedResultToShow;
   private ViewfinderView viewfinderView;
-  private TextView statusView;
   private View resultView;
   private Result lastResult;
   private boolean hasSurface;
@@ -148,7 +147,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     viewfinderView.setCameraManager(cameraManager);
 
     resultView = findViewById(R.id.result_view);
-    statusView = (TextView) findViewById(R.id.status_view);
 
     handler = null;
     lastResult = null;
@@ -199,11 +197,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
           }
         }
         
-        String customPromptMessage = intent.getStringExtra(Intents.Scan.PROMPT_MESSAGE);
-        if (customPromptMessage != null) {
-          statusView.setText(customPromptMessage);
-        }
-
       } else if (dataString != null &&
                  dataString.contains(PRODUCT_SEARCH_URL_PREFIX) &&
                  dataString.contains(PRODUCT_SEARCH_URL_SUFFIX)) {
@@ -428,7 +421,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
   // Put up our own UI for how to handle the decoded contents.
   private void handleDecodeInternally(Result rawResult, ResultHandler resultHandler, Bitmap barcode) {
-    statusView.setVisibility(View.GONE);
     viewfinderView.setVisibility(View.GONE);
     resultView.setVisibility(View.VISIBLE);
 
@@ -523,13 +515,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     } else {
       resultDurationMS = getIntent().getLongExtra(Intents.Scan.RESULT_DISPLAY_DURATION_MS,
                                                   DEFAULT_INTENT_RESULT_DURATION_MS);
-    }
-
-    // Since this message will only be shown for a second, just tell the user what kind of
-    // barcode was found (e.g. contact info) rather than the full contents, which they won't
-    // have time to read.
-    if (resultDurationMS > 0) {
-      statusView.setText(getString(resultHandler.getDisplayTitle()));
     }
 
     if (copyToClipboard && !resultHandler.areContentsSecure()) {
@@ -648,8 +633,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
   private void resetStatusView() {
     resultView.setVisibility(View.GONE);
-    statusView.setText(R.string.msg_default_status);
-    statusView.setVisibility(View.VISIBLE);
     viewfinderView.setVisibility(View.VISIBLE);
     lastResult = null;
   }

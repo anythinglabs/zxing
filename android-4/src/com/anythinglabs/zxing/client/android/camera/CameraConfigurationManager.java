@@ -58,19 +58,11 @@ final class CameraConfigurationManager {
    */
   void initFromCameraParameters(Camera camera) {
     Camera.Parameters parameters = camera.getParameters();
+    camera.setDisplayOrientation(90);
     WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     Display display = manager.getDefaultDisplay();
-    int width = display.getWidth();
-    int height = display.getHeight();
-    // We're landscape-only, and have apparently seen issues with display thinking it's portrait 
-    // when waking from sleep. If it's not landscape, assume it's mistaken and reverse them:
-    if (width < height) {
-      Log.i(TAG, "Display reports portrait orientation; assuming this is incorrect");
-      int temp = width;
-      width = height;
-      height = temp;
-    }
-    screenResolution = new Point(width, height);
+    screenResolution = new Point();
+    display.getSize(screenResolution);
     Log.i(TAG, "Screen resolution: " + screenResolution);
     cameraResolution = findBestPreviewSizeValue(parameters, screenResolution);
     Log.i(TAG, "Camera resolution: " + cameraResolution);
@@ -78,6 +70,7 @@ final class CameraConfigurationManager {
 
   void setDesiredCameraParameters(Camera camera, boolean safeMode) {
     Camera.Parameters parameters = camera.getParameters();
+    parameters.set("orientation", "portrait");
 
     if (parameters == null) {
       Log.w(TAG, "Device error: no camera parameters are available. Proceeding without configuration.");
@@ -113,7 +106,7 @@ final class CameraConfigurationManager {
   }
 
   Point getCameraResolution() {
-    return cameraResolution;
+	return cameraResolution;
   }
 
   Point getScreenResolution() {
@@ -157,16 +150,6 @@ final class CameraConfigurationManager {
     if (flashMode != null) {
       parameters.setFlashMode(flashMode);
     }
-
-    /*
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-    if (!prefs.getBoolean(PreferencesActivity.KEY_DISABLE_EXPOSURE, false)) {
-      if (!safeMode) {
-        ExposureInterface exposure = new ExposureManager().build();
-        exposure.setExposure(parameters, newSetting);
-      }
-    }
-     */
   }
 
   private Point findBestPreviewSizeValue(Camera.Parameters parameters, Point screenResolution) {
@@ -175,7 +158,7 @@ final class CameraConfigurationManager {
     if (rawSupportedSizes == null) {
       Log.w(TAG, "Device returned no supported preview sizes; using default");
       Camera.Size defaultSize = parameters.getPreviewSize();
-      return new Point(defaultSize.width, defaultSize.height);
+      return new Point(defaultSize.height, defaultSize.width);
     }
 
     // Sort by size, descending
@@ -205,7 +188,7 @@ final class CameraConfigurationManager {
     }
 
     Point bestSize = null;
-    float screenAspectRatio = (float) screenResolution.x / (float) screenResolution.y;
+    float screenAspectRatio = (float) screenResolution.y / (float) screenResolution.x;
 
     float diff = Float.POSITIVE_INFINITY;
     for (Camera.Size supportedPreviewSize : supportedPreviewSizes) {
