@@ -87,7 +87,6 @@ public final class CameraManager {
     if (!initialized) {
       initialized = true;
       configManager.initFromCameraParameters(theCamera);
-      holder.setFixedSize(configManager.getCameraResolution().y, configManager.getCameraResolution().x);
       if (requestedFramingRectWidth > 0 && requestedFramingRectHeight > 0) {
         setManualFramingRect(requestedFramingRectWidth, requestedFramingRectHeight);
         requestedFramingRectWidth = 0;
