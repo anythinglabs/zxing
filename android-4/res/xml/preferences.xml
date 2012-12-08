@@ -97,7 +97,7 @@
      -->
   </PreferenceCategory>
   <PreferenceCategory android:title="@string/preferences_try_bsplus">
-    <com.google.zxing.client.android.pref.BSPlusPreference
+    <com.anythinglabs.zxing.client.android.pref.BSPlusPreference
         android:title="@string/preferences_try_bsplus"
         android:summary="@string/preferences_try_bsplus_summary"/>
   </PreferenceCategory>

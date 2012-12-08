@@ -16,16 +16,8 @@
 
 package com.anythinglabs.zxing.client.android.result;
 
-import com.anythinglabs.zxing.client.android.Contents;
-import com.anythinglabs.zxing.client.android.Intents;
-import com.anythinglabs.zxing.client.android.LocaleManager;
-import com.anythinglabs.zxing.client.android.PreferencesActivity;
-import com.anythinglabs.zxing.client.android.R;
-import com.anythinglabs.zxing.client.android.book.SearchBookContentsActivity;
-import com.google.zxing.Result;
-import com.google.zxing.client.result.ParsedResult;
-import com.google.zxing.client.result.ParsedResultType;
-import com.google.zxing.client.result.ResultParser;
+import java.util.Collection;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -33,16 +25,19 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 
-import java.util.Collection;
-import java.util.Locale;
+import com.anythinglabs.zxing.client.android.Contents;
+import com.anythinglabs.zxing.client.android.LocaleManager;
+import com.anythinglabs.zxing.client.android.R;
+import com.google.zxing.Result;
+import com.google.zxing.client.result.ParsedResult;
+import com.google.zxing.client.result.ParsedResultType;
+import com.google.zxing.client.result.ResultParser;
 
 /**
  * A base class for the Android-specific barcode handlers. These allow the app to polymorphically
@@ -112,7 +107,7 @@ public abstract class ResultHandler {
     this.result = result;
     this.activity = activity;
     this.rawResult = rawResult;
-    this.customProductSearch = parseCustomSearchURL();
+    this.customProductSearch = null;
 
     // Make sure the Shopper button is hidden by default. Without this, scanning a product followed
     // by a QR Code would leave the button on screen among the QR Code actions.
@@ -405,13 +400,6 @@ public abstract class ResultHandler {
     launchIntent(new Intent(Intent.ACTION_VIEW, uri));
   }
 
-  final void searchBookContents(String isbnOrUrl) {
-    Intent intent = new Intent(Intents.SearchBookContents.ACTION);
-    intent.setClassName(activity, SearchBookContentsActivity.class.getName());
-    putExtra(intent, Intents.SearchBookContents.ISBN, isbnOrUrl);
-    launchIntent(intent);
-  }
-
   final void openURL(String url) {
     // Strangely, some Android browsers don't seem to register to handle HTTP:// or HTTPS://.
     // Lower-case these as it should always be OK to lower-case these schemes.
@@ -493,16 +481,6 @@ public abstract class ResultHandler {
     if (value != null && value.length() > 0) {
       intent.putExtra(key, value);
     }
-  }
-
-  private String parseCustomSearchURL() {
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-    String customProductSearch = prefs.getString(PreferencesActivity.KEY_CUSTOM_PRODUCT_SEARCH,
-        null);
-    if (customProductSearch != null && customProductSearch.trim().length() == 0) {
-      return null;
-    }
-    return customProductSearch;
   }
 
   final String fillInCustomSearchURL(String text) {
